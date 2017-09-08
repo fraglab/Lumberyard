@@ -15,7 +15,7 @@ timestamps{
 					--disablecapability rungame ^
 					--disablecapability runeditor ^
 					--enablecapability compilegame ^
-					--enablecapability compileengine ^ 
+					--enablecapability compileengine ^
 					--enablecapability compilesandbox ^
 					""".stripIndent()
 				bat "lmbr_waf.bat --use-incredibuild true build_win_x64_vs2015_profile_test -p all"
