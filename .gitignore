@@ -3,6 +3,7 @@
 
 # Except for all other directories & subdirectories
 !**/
+!Jenkinsfile
 
 # In every subdirectory, avoid ignoring files with the following extensions.
 !**/*.[cC][pP][pP]
