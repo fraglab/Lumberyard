@@ -1,5 +1,7 @@
 timestamps{
 	node('win_git_build_slave') {
+		properties([disableConcurrentBuilds()])
+		
 		stage('Checkout'){
 			checkout scm
 		}
