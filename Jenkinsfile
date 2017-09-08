@@ -9,7 +9,15 @@ timestamps{
 		stage('Build'){
 			bat "git_bootstrap.exe -k -s --skipSetupAssistant"
 			dir("dev"){
-				bat "Tools\\LmbrSetup\\Win\\SetupAssistantBatch.exe --3rdpartypath C:\3rdparty --enablecapability compilegame --enablecapability compileengine --enablecapability compilesandbox"
+				bat """\
+					Tools\\LmbrSetup\\Win\\SetupAssistantBatch.exe^ 
+					--3rdpartypath C:\\3rdparty^ 
+					--disablecapability rungame^ 
+					--disablecapability runeditor^ 
+					--enablecapability compilegame^ 
+					--enablecapability compileengine^  
+					--enablecapability compilesandbox^ 
+					""".stripIndent()
 				bat "lmbr_waf.bat --use-incredibuild true build_win_x64_vs2015_profile_test -p all"
 			}
 		}
