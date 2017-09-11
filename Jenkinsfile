@@ -10,7 +10,7 @@ timestamps{
 		   
 			stage('Build'){
 				if (BOOTSTRAP)
-					bat "git_bootstrap.exe -k -s --skipSetupAssistant"
+					bat "git_bootstrap.exe -s --skipSetupAssistant"
 				dir("dev"){
 					bat """\
 						Tools\\LmbrSetup\\Win\\SetupAssistantBatch.exe ^
