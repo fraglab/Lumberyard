@@ -1,6 +1,6 @@
-timestamps{
-	ws("C:\\GIT_${BRANCH_NAME}"){
-		node('win_git_build_slave') {
+timestamps{	
+	node('win_git_build_slave') {
+		ws("C:\\GIT_${BRANCH_NAME}"){
 			properties([parameters([booleanParam(defaultValue: false, description: 'Run git_bootstrap.exe', name: 'BOOTSTRAP')]), pipelineTriggers([])])
 			properties([disableConcurrentBuilds()])
 			
