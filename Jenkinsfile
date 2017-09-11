@@ -1,5 +1,5 @@
 def need_bootstrap(){
-	if (project.hasProperty("BOOTSTRAP")
+	if (project.hasProperty("BOOTSTRAP"))
 		return BOOTSTRAP
 	else 
 		return true
