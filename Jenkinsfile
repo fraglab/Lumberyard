@@ -1,5 +1,5 @@
 def need_bootstrap(){
-	if (project.hasProperty("BOOTSTRAP"))
+	if (getBinding().hasVariable("BOOTSTRAP"))
 		return BOOTSTRAP
 	else 
 		return true
@@ -34,7 +34,9 @@ timestamps{
 			
 			stage('Test'){
 				dir("dev"){
-					bat "lmbr_test.cmd scan --dir Bin64vc140.Test"
+					bat 'rd TestResults /S /Q || Echo TestResults already absent'
+					bat 'lmbr_test.cmd scan --dir Bin64vc140.Test'
+					junit allowEmptyResults: true, testResults: 'TestResults\\*\\*.xml'
 				}
 			}
 		}
