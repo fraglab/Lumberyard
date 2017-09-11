@@ -3,8 +3,9 @@ def need_bootstrap(){
 		return BOOTSTRAP
 	else 
 		return true
+}
 
-timestamps{	
+timestamps{
 	node('win_git_build_slave') {
 		ws("C:\\GIT_${BRANCH_NAME}"){
 			properties([disableConcurrentBuilds(),
