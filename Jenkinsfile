@@ -1,3 +1,9 @@
+def need_bootstrap(){
+	if (project.hasProperty("BOOTSTRAP")
+		return BOOTSTRAP
+	else 
+		return true
+
 timestamps{	
 	node('win_git_build_slave') {
 		ws("C:\\GIT_${BRANCH_NAME}"){
@@ -9,7 +15,7 @@ timestamps{
 			}
 		   
 			stage('Build'){
-				if (BOOTSTRAP)
+				if (need_bootstrap())
 					bat "git_bootstrap.exe -s --skipSetupAssistant"
 				dir("dev"){
 					bat """\
