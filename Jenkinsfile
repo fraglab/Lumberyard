@@ -8,6 +8,8 @@ def need_bootstrap(){
 timestamps{
 	node('win_git_build_slave') {
 		ws("C:\\GIT_${BRANCH_NAME}"){
+			def GOT_ERROR = false
+			def ERROR_TEXT
 			def bootstrap = need_bootstrap()
 			properties([disableConcurrentBuilds(),
 						parameters([booleanParam(defaultValue: false, description: 'Run git_bootstrap.exe', name: 'BOOTSTRAP')])])
@@ -34,18 +36,16 @@ timestamps{
 			}
 			
 			stage('Test'){
-				def GOT_ERROR = false
-				def ERROR_TEXT
 				dir("dev"){
 					bat 'rd TestResults /S /Q || Echo TestResults already absent'
 					try {
 						bat 'lmbr_test.cmd scan --dir Bin64vc140.Test'
-					} catch (err){ 
+					} catch (err){
 						GOT_ERROR = true
 						ERROR_TEXT = "Test error: ${err}"
-					}					
+					}
 					junit allowEmptyResults: true, testResults: 'TestResults\\*\\*.xml'
-				}				
+				}
 			}
 			if (GOT_ERROR){
 				error ERROR_TEXT
