@@ -1,6 +1,6 @@
 def need_bootstrap(){
 	if (params.containsKey('BOOTSTRAP'))		
-		return BOOTSTRAP
+		return BOOTSTRAP == "true"
 	else 
 		return true
 }
