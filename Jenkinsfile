@@ -34,11 +34,21 @@ timestamps{
 			}
 			
 			stage('Test'){
+				def GOT_ERROR = false
+				def ERROR_TEXT
 				dir("dev"){
 					bat 'rd TestResults /S /Q || Echo TestResults already absent'
-					bat 'lmbr_test.cmd scan --dir Bin64vc140.Test'
+					try {
+						bat 'lmbr_test.cmd scan --dir Bin64vc140.Test'
+					} catch (err){ 
+						GOT_ERROR = true
+						ERROR_TEXT = "Test error: ${err}"
+					}					
 					junit allowEmptyResults: true, testResults: 'TestResults\\*\\*.xml'
-				}
+				}				
+			}
+			if (GOT_ERROR){
+				error ERROR_TEXT
 			}
 		}
 	}
