@@ -1,5 +1,5 @@
 def need_bootstrap(){
-	if (getBinding().hasVariable("BOOTSTRAP"))
+	if (params.containsKey('BOOTSTRAP'))		
 		return BOOTSTRAP
 	else 
 		return true
@@ -8,6 +8,7 @@ def need_bootstrap(){
 timestamps{
 	node('win_git_build_slave') {
 		ws("C:\\GIT_${BRANCH_NAME}"){
+			def bootstrap = need_bootstrap()
 			properties([disableConcurrentBuilds(),
 						parameters([booleanParam(defaultValue: false, description: 'Run git_bootstrap.exe', name: 'BOOTSTRAP')])])
 						
@@ -16,7 +17,7 @@ timestamps{
 			}
 		   
 			stage('Build'){
-				if (need_bootstrap())
+				if (bootstrap)
 					bat "git_bootstrap.exe -s --skipSetupAssistant"
 				dir("dev"){
 					bat """\
