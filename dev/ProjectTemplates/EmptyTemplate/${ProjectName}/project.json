@@ -1,0 +1,21 @@
+{
+    "project_name": "${ProjectName}",
+    "product_name": "${ProjectName}",
+    "executable_name": "${ProjectName}Launcher",
+    "modules" : [],
+    "project_id": "${ProjectId}",
+
+    "android_settings" : {
+        "package_name" : "com.lumberyard.yourgame",
+        "version_number" : 1,
+        "version_name" : "1.0.0.0",
+        "orientation" : "landscape"
+    },
+
+    "durango_settings" : {
+    },
+
+    "orbis_settings": {
+    }
+
+}

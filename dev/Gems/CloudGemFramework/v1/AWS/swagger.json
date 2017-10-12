@@ -1,0 +1,135 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "$RestApiResourceName$",
+        "description": "API for the $ResourceGroupName$ service ($DeploymentName$ deployment)."
+   },
+    "schemes": [
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "x-amazon-cloud-canvas-lambda-dispatch": {
+        "lambda": "$ServiceLambdaArn$"
+    },
+    "paths": {
+
+        "/service/status": {
+            "x-amazon-cloud-canvas-lambda-dispatch": {
+                "module": "service_status"
+            },
+            "get": {
+                "operationId": "get_service_status",
+                "description": "Returns the service's status. Useful for testing connectivity.",
+                "responses": {
+                    "200": {
+                        "description": "A successful service status response.",
+                        "schema": {
+                            "$ref": "#/definitions/ServiceStatus"
+                        }
+                    }
+                }
+            }
+        },
+
+        "/deployment/{deployment_name}/access/resource/{resource_name}": {
+            "get": {
+                "description": "Returns basic information about a resource in a deployment access stack.",
+                "parameters": [
+                    {
+                        "name": "deployment_name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "resource_name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A resource physical id.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceInfo"
+                        }
+                    }
+                },
+                "x-amazon-cloud-canvas-lambda-dispatch": {
+                    "module": "resource_info",
+                    "function": "get_deployment_access_resource_info"
+                }
+            }
+        },
+
+        "/deployment/{deployment_name}/resource-group/{resource_group_name}/resource/{resource_name}": {
+            "get": {
+                "description": "Returns basic information about a resource in a resource group stack..",
+                "parameters": [
+                    {
+                        "name": "deployment_name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "resource_group_name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "resource_name",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A resource physical id.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceInfo"
+                        }
+                    }
+                },
+                "x-amazon-cloud-canvas-lambda-dispatch": {
+                    "module": "resource_info",
+                    "function": "get_resource_group_resource_info"
+                }
+            }
+        }
+
+    },
+    "definitions": {
+        "ResourceInfo": {
+            "type": "object",
+            "properties": {
+                "PhysicalId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "PhysicalId"
+            ]
+        },
+        "ServiceStatus": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "status"
+            ]
+        }
+    }
+}

@@ -24,21 +24,6 @@ struct ICharacterInstance;
 namespace LmbrCentral
 {
     /*!
-    * MaterialRequestBus
-    * Messages serviced by the component that support materials (e.g. Mesh, Decal).
-    */
-    class MaterialRequests
-        : public AZ::ComponentBus
-    {
-    public:
-
-        virtual void SetMaterial(_smart_ptr<IMaterial>) = 0;
-        virtual _smart_ptr<IMaterial> GetMaterial() = 0;
-    };
-
-    using MaterialRequestBus = AZ::EBus<MaterialRequests>;
-
-    /*!
      * MeshComponentRequestBus
      * Messages serviced by the mesh component.
      */
@@ -129,17 +114,17 @@ namespace LmbrCentral
     using SkinnedMeshComponentRequestBus = AZ::EBus<SkinnedMeshComponentRequests>;
 
     /*!
-    * StaticMeshComponentRequestBus
+    * LegacyMeshComponentRequestBus
     * Messages serviced by the mesh component.
     */
-    class StaticMeshComponentRequests
+    class LegacyMeshComponentRequests
         : public AZ::ComponentBus
     {
     public:
         virtual IStatObj* GetStatObj() = 0;
     };
 
-    using StaticMeshComponentRequestBus = AZ::EBus<StaticMeshComponentRequests>;
+    using LegacyMeshComponentRequestBus = AZ::EBus<LegacyMeshComponentRequests>;
 
     /*!
      * MeshComponentNotificationBus

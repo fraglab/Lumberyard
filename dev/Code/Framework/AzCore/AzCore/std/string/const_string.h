@@ -35,9 +35,8 @@ namespace AZStd
         using const_reference = const value_type&;
 
         using size_type    = AZStd::size_t;
-        using basic_string = AZStd::basic_string<value_type, traits_type>;
 
-        static const size_type npos = basic_string::npos;
+        static const size_type npos = AZStd::basic_string<value_type, traits_type>::npos;
 
         using iterator               = const value_type*;
         using const_iterator         = const value_type*;
@@ -49,7 +48,8 @@ namespace AZStd
             , m_end(nullptr)
         { }
 
-        basic_const_string(const basic_string& s)
+        template <typename Allocator>
+        basic_const_string(const basic_string<value_type, traits_type, Allocator>& s)
             : m_begin(s.c_str())
             , m_end(m_begin + s.length()) 
         { }
@@ -98,26 +98,36 @@ namespace AZStd
         void rshorten(size_type shift = 1) { m_end -= shift; if (m_end <= m_begin) erase(); }
         void lshorten(size_type shift = 1) { m_begin += shift; if (m_end <= m_begin) erase(); }
 
-        operator basic_string() const
+        operator basic_string<value_type, traits_type, AZStd::allocator>() const
         {
-            return to_string();
+            return to_string<AZStd::allocator>();
         }
 
-        basic_string to_string(allocator alloc = allocator()) const
+        template <typename Allocator = AZStd::allocator>
+        basic_string<value_type, traits_type, Allocator> to_string(Allocator alloc = Allocator()) const
         {
-            return basic_string(m_begin, m_end, alloc);
+            return basic_string<value_type, traits_type, Allocator>(m_begin, m_end, alloc);
         }
 
         basic_const_string& operator=(const basic_const_string& s) { if( &s != this ) { m_begin = s.m_begin; m_end = s.m_end; } return *this; }
-        basic_const_string& operator=(const basic_string& s)       { return *this = basic_const_string(s); }
         basic_const_string& operator=(const_pointer s)             { return *this = basic_const_string(s); }
 
+        template <typename Allocator>
+        basic_const_string& operator=(const basic_string<value_type, traits_type, Allocator>& s)
+        {
+            return *this = basic_const_string(s);
+        }
+
         basic_const_string& assign(const basic_const_string& s)          { return *this = s; }
-        basic_const_string& assign(const basic_string& s, size_type len) { return *this = basic_const_string(s.c_str(), len); }
-        basic_const_string& assign(const basic_string& s)                { return *this = basic_const_string(s); }
         basic_const_string& assign(const_pointer s)                      { return *this = basic_const_string(s); }
         basic_const_string& assign(const_pointer s, size_type len)       { return *this = basic_const_string(s, len); }
         basic_const_string& assign(const_pointer f, const_pointer l)     { return *this = basic_const_string(f, l); }
+
+        template <typename Allocator>
+        basic_const_string& assign(const basic_string<value_type, traits_type, Allocator>& s)
+        {
+            return *this = basic_const_string(s);
+        }
 
         void swap(basic_const_string& s)
         {
@@ -133,17 +143,21 @@ namespace AZStd
             return s1.length() == s2.length() && (s1.m_begin == nullptr || traits_type::compare(s1.m_begin, s2.m_begin, s1.length()) == 0);
         }
         friend bool operator==(const basic_const_string& s1, const_pointer s2)       { return s1 == basic_const_string(s2); }
-        friend bool operator==(const basic_const_string& s1, const basic_string& s2) { return s1 == basic_const_string(s2); }
+        template <typename Allocator>
+        friend bool operator==(const basic_const_string& s1, const basic_string<value_type, traits_type, Allocator>& s2) { return s1 == basic_const_string(s2); }
 
         friend bool operator!=(const basic_const_string& s1, const basic_const_string& s2) { return !(s1 == s2); }
-        friend bool operator!=(const basic_const_string& s1, const_pointer s2)             { return !(s1 == s2); }
-        friend bool operator!=(const basic_const_string& s1, const basic_string&  s2)      { return !(s1 == s2); }
+        friend bool operator!=(const basic_const_string& s1, const_pointer s2) { return !(s1 == s2); }
+        template <typename Allocator>
+        friend bool operator!=(const basic_const_string& s1, const basic_string<value_type, traits_type, Allocator>&  s2)      { return !(s1 == s2); }
 
-        friend bool operator==(const_pointer s2, const basic_const_string& s1)        { return s1 == s2; }
-        friend bool operator==(const basic_string&  s2, const basic_const_string& s1) { return s1 == s2; }
+        friend bool operator==(const_pointer s2, const basic_const_string& s1) { return s1 == s2; }
+        template <typename Allocator>
+        friend bool operator==(const basic_string<value_type, traits_type, Allocator>&  s2, const basic_const_string& s1) { return s1 == s2; }
 
         friend bool operator!=(const_pointer s2, const basic_const_string& s1) { return !(s1 == s2); }
-        friend bool operator!=(const basic_string&  s2, const basic_const_string& s1) { return !(s1 == s2); }
+        template <typename Allocator>
+        friend bool operator!=(const basic_string<value_type, traits_type, Allocator>&  s2, const basic_const_string& s1) { return !(s1 == s2); }
 
         iterator         begin() const  { return m_begin; }
         iterator         end() const    { return m_end;   }

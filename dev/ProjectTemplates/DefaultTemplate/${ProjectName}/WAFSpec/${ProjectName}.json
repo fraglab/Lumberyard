@@ -1,0 +1,9 @@
+{
+    "description": "Configuration for ${ProjectName}",
+    "visual_studio_name": "${ProjectName}",
+    "comment" : "",
+    "game_projects" : "${ProjectName}",
+
+    "modules" : [
+    ]
+}
