@@ -29,6 +29,7 @@
 #include <AzFramework/Input/Devices/Keyboard/InputDeviceKeyboard.h>
 #include <AzCore/Debug/Trace.h>
 #include <AzFramework/Logging/MissingAssetLogger.h>
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
 
 
 #if defined(AZ_RESTRICTED_PLATFORM)
@@ -2391,6 +2392,7 @@ bool CSystem::UpdatePostTickBus(int updateFlags, int nPauseMode)
             }
         }
 
+ASYNC_RENDER_ENABLED_BEGIN
         // Begin occlusion job after setting the correct camera.
         gEnv->p3DEngine->PrepareOcclusion(GetViewCamera());
 
@@ -2401,6 +2403,7 @@ bool CSystem::UpdatePostTickBus(int updateFlags, int nPauseMode)
         gEnv->p3DEngine->EndOcclusion();
 
         RenderEnd();
+ASYNC_RENDER_ENABLED_END
 
         gEnv->p3DEngine->SyncProcessStreamingUpdate();
 

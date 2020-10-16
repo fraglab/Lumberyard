@@ -20,6 +20,9 @@
 #include <AzFramework/Terrain/TerrainDataRequestBus.h>
 
 #include "Environment/OceanEnvironmentBus.h"
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 int CDecalRenderNode::m_nFillBigDecalIndicesCounter = 0;
 
@@ -466,4 +469,17 @@ void CDecalRenderNode::OffsetPosition(const Vec3& delta)
     m_pos += delta;
     m_WSBBox.Move(delta);
     m_Matrix.SetTranslation(m_Matrix.GetTranslation() + delta);
+}
+
+void CDecalRenderNode::CopyUpdatedData(const IRenderNode& renderNode)
+{
+    SetRndFlags(renderNode.GetRndFlags());
+    auto pNextFrameRenderNode = static_cast<const CDecalRenderNode*>(&renderNode);
+    m_pos = pNextFrameRenderNode->m_pos;
+    m_localBounds = pNextFrameRenderNode->m_localBounds;
+    m_pMaterial = pNextFrameRenderNode->m_pMaterial;
+    m_updateRequested = pNextFrameRenderNode->m_updateRequested;
+    m_decalProperties = pNextFrameRenderNode->m_decalProperties;
+    m_WSBBox = pNextFrameRenderNode->m_WSBBox;
+    m_Matrix = pNextFrameRenderNode->m_Matrix;
 }

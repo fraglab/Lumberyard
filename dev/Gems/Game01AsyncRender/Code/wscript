@@ -1,0 +1,10 @@
+
+def build(bld):
+    bld.DefineGem(
+        file_list       = ['game01asyncrender.waf_files'],
+        defines         = ['IMGUI_ENABLED'],
+        export_defines  = ['USE_ASYNC_RENDER'],
+        features        = ['vera', 'link_running_program'],
+        use             = ['AzFramework', 'AzCore', 'ImGui'],
+        includes        = [bld.Path('Code/CryEngine/Cry3DEngine'), bld.Path('Code/CryEngine/CryCommon')],
+    )

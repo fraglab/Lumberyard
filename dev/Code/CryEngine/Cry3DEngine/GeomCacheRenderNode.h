@@ -166,6 +166,10 @@ public:
 
     void OffsetPosition(const Vec3& delta) {}
 
+    void CopyUpdatedData(const IRenderNode& renderNode) override;
+    IRenderNode* Clone() const override;
+    bool SupportsAsyncRender() const override { return true; }
+
 #ifndef _RELEASE
     void DebugRender();
 #endif

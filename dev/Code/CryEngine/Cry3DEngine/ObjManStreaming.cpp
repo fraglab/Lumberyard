@@ -1443,6 +1443,13 @@ void CObjManager::UpdateRenderNodeStreamingPriority(IRenderNode* pObj, float fEn
         pMMRM->UpdateStreamableComponents(fImportance, fEntDistance, bFullUpdate);
         return;
     }
+    else if (nodeType == eERType_Dummy_0)
+    {
+        if (pObj->UpdateStreamableData(fEntDistanceReal, fImportanceFactor, bFullUpdate))
+        {
+            return;
+        }
+    }
 
     const int nSlotCount = pObj->GetSlotCount();
     for (int nEntSlot = 0; nEntSlot < nSlotCount; ++nEntSlot)

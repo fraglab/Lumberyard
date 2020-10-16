@@ -23,6 +23,9 @@
 #include "MatMan.h"
 
 #include <AzCore/Jobs/JobFunction.h>
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 namespace
 {
@@ -1490,6 +1493,82 @@ void CGeomCacheRenderNode::OnGeomCacheStaticDataLoaded()
 void CGeomCacheRenderNode::OnGeomCacheStaticDataUnloaded()
 {
     Clear(false);
+}
+
+void CGeomCacheRenderNode::CopyUpdatedData(const IRenderNode& renderNode)
+{
+    SetRndFlags(renderNode.GetRndFlags());
+    auto pNextFrameRenderNode = static_cast<const CGeomCacheRenderNode*>(&renderNode);
+    SetMatrix(pNextFrameRenderNode->m_matrix);
+    m_bBoundsChanged = pNextFrameRenderNode->m_bBoundsChanged;
+    m_bIsStreaming = pNextFrameRenderNode->m_bIsStreaming;
+    m_streamingTime = pNextFrameRenderNode->m_streamingTime;
+    m_playbackTime = pNextFrameRenderNode->m_playbackTime;
+    if (m_pGeomCache != pNextFrameRenderNode->m_pGeomCache)
+    {
+        m_pMaterial = pNextFrameRenderNode->m_pMaterial;
+        m_bLooping = pNextFrameRenderNode->m_bLooping;
+        m_playbackTime = pNextFrameRenderNode->m_playbackTime;
+        m_pFirstFrameStandIn = pNextFrameRenderNode->m_pFirstFrameStandIn;
+        m_pLastFrameStandIn = pNextFrameRenderNode->m_pLastFrameStandIn;
+        m_currentAABB = pNextFrameRenderNode->m_currentAABB;
+        m_pGeomCache = pNextFrameRenderNode->m_pGeomCache;
+        UpdateBBox();
+    }
+
+    if (m_renderMeshes.size() != pNextFrameRenderNode->m_renderMeshes.size())
+    {
+        m_renderMeshes = pNextFrameRenderNode->m_renderMeshes;
+    }
+
+    if (m_pRenderElements.size() != pNextFrameRenderNode->m_pRenderElements.size())
+    {
+        for (auto iter = pNextFrameRenderNode->m_pRenderElements.begin(); iter != pNextFrameRenderNode->m_pRenderElements.end(); ++iter)
+        {
+            const uint materialId = iter->first;
+            const SGeomCacheRenderElementData& data = iter->second;
+            m_pRenderElements[iter->first] = data;
+        }
+        m_pMaterial = pNextFrameRenderNode->m_pMaterial;
+    }
+}
+
+IRenderNode* CGeomCacheRenderNode::Clone() const
+{
+    auto renderNodeFillThread = new CGeomCacheRenderNode;
+    renderNodeFillThread->SetRndFlags(GetRndFlags());
+    renderNodeFillThread->m_pGeomCache = m_pGeomCache;
+    renderNodeFillThread->m_playbackTime = m_playbackTime;
+    renderNodeFillThread->m_streamingTime = m_streamingTime;
+    renderNodeFillThread->m_pPhysicalEntity = m_pPhysicalEntity;
+    renderNodeFillThread->m_maxViewDist = m_maxViewDist;
+    renderNodeFillThread->m_bBox = m_bBox;
+    renderNodeFillThread->m_currentAABB = m_currentAABB;
+    renderNodeFillThread->m_currentDisplayAABB = m_currentDisplayAABB;
+    renderNodeFillThread->m_standInVisible = m_standInVisible;
+    renderNodeFillThread->m_pStandIn = m_pStandIn;
+    renderNodeFillThread->m_pFirstFrameStandIn = m_pFirstFrameStandIn;
+    renderNodeFillThread->m_pLastFrameStandIn = m_pLastFrameStandIn;
+    renderNodeFillThread->m_standInDistance = m_standInDistance;
+    renderNodeFillThread->m_streamInDistance = m_streamInDistance;
+    renderNodeFillThread->m_bLooping = m_bLooping;
+    renderNodeFillThread->m_bIsStreaming = m_bIsStreaming;
+    renderNodeFillThread->m_bFilledFrameOnce = m_bFilledFrameOnce;
+    renderNodeFillThread->m_bBoundsChanged = m_bBoundsChanged;
+    renderNodeFillThread->m_bDrawing = m_bDrawing;
+    renderNodeFillThread->m_bTransformReady = m_bTransformReady;
+    renderNodeFillThread->m_matrix = m_matrix;
+    renderNodeFillThread->m_pMaterial = m_pMaterial;
+    renderNodeFillThread->Initialize();
+    GetGeomCacheManager()->UnRegisterForStreaming(renderNodeFillThread, false);
+    for (auto iter = m_pRenderElements.begin(); iter != m_pRenderElements.end(); ++iter)
+    {
+        const uint materialId = iter->first;
+        const SGeomCacheRenderElementData& data = iter->second;
+        renderNodeFillThread->m_pRenderElements[iter->first] = data;
+    }
+
+    return renderNodeFillThread;
 }
 
 #endif

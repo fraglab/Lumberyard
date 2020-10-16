@@ -63,6 +63,8 @@ public:
     CDecalRenderNode();
     void RequestUpdate() { m_updateRequested = true; DeleteDecal(); }
     void DeleteDecal();
+    void CopyUpdatedData(const IRenderNode& renderNode) override;
+    bool SupportsAsyncRender() const override { return true; }
 
 private:
     ~CDecalRenderNode();

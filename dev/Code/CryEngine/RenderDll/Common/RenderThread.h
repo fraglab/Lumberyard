@@ -785,7 +785,7 @@ _inline bool SRenderThread::IsMainThread(bool bAlwaysCheck)
 #else
     threadID threadId = this->GetCurrentThreadId(bAlwaysCheck);
 
-    return threadId == m_nMainThread;
+    return threadId == m_nMainThread || threadId == gEnv->mTickThreadId;
 #endif
 }
 

@@ -1,0 +1,7 @@
+{
+    "auto": {
+        "Tests": [
+            "Tests/Game01AsyncRenderTest.cpp"
+        ]
+    }
+}

@@ -77,6 +77,7 @@
 #include <limits>
 #include "VegetationPoolManager.h"
 #include "ParticleManager.h"
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h> // FL[FD-12690] RenderWorld as async job
 
 #if !defined(EXCLUDE_DOCUMENTATION_PURPOSE)
 #include "PrismRenderNode.h"
@@ -1507,6 +1508,16 @@ LegacyProceduralVegetation::IVegetationPoolManager& C3DEngine::GetIVegetationPoo
 void C3DEngine::RegisterEntity(IRenderNode* pEnt, int nSID, int nSIDConsideredSafe)
 {
     FUNCTION_PROFILER_3DENGINE;
+
+#ifdef USE_ASYNC_RENDER
+    bool bSkipOctreeUpdate = false;
+    EBUS_EVENT_RESULT(bSkipOctreeUpdate, Fraglab::AsyncRenderWorldSynchronizationRequestBus, ChangeRenderNodeRegisteredState, pEnt, true);
+    if (bSkipOctreeUpdate)
+    {
+        return;
+    }
+#endif
+
     if (gEnv->mMainThreadId != CryGetCurrentThreadId())
     {
         CryFatalError("C3DEngine::RegisterEntity should only be called on main thread.");
@@ -1523,6 +1534,14 @@ void C3DEngine::UnRegisterEntityDirect(IRenderNode* pEnt)
 
 void C3DEngine::UnRegisterEntityAsJob(IRenderNode* pEnt)
 {
+#ifdef USE_ASYNC_RENDER
+    bool bSkipOctreeUpdate = false;
+    EBUS_EVENT_RESULT(bSkipOctreeUpdate, Fraglab::AsyncRenderWorldSynchronizationRequestBus, ChangeRenderNodeRegisteredState, pEnt, false);
+    if (bSkipOctreeUpdate)
+    {
+        return;
+    }
+#endif
     AsyncOctreeUpdate(pEnt, (int)0, (int)0, (int)0, true);
 }
 
@@ -2178,6 +2197,18 @@ bool C3DEngine::GetSnowFallParams(int& nSnowFlakeCount, float& fSnowFlakeSize, f
     return bRet;
 }
 
+void C3DEngine::CallOnPreAsyncRender()
+{
+#ifdef USE_ASYNC_RENDER
+    COctreeNode::ReleaseEmptyNodes();
+    auto passInfo = SRenderingPassInfo::CreateGeneralPassRenderingInfo(gEnv->pSystem->GetViewCamera());
+    UpdateSun(passInfo);
+#if defined(FEATURE_SVO_GI)
+    m_svoManager.CollectLights();
+#endif // FEATURE_SVO_GI
+#endif // USE_ASYNC_RENDER
+}
+
 void C3DEngine::SetSunDir(const Vec3& newSunDir)
 {
     Vec3 vSunDirNormalized = newSunDir.normalized();
@@ -2211,6 +2242,15 @@ void C3DEngine::FreeRenderNodeState(IRenderNode* pEnt)
     {
         m_deferredRenderComponentStreamingPriorityUpdates.DeleteFastUnsorted(nElementID);
     }
+
+#ifdef USE_ASYNC_RENDER
+    bool bSkipOctreeUpdate = false;
+    EBUS_EVENT_RESULT(bSkipOctreeUpdate, Fraglab::AsyncRenderWorldSynchronizationRequestBus, ChangeRenderNodeRegisteredState, pEnt, false);
+    if (bSkipOctreeUpdate)
+    {
+        return;
+    }
+#endif
 
     m_pObjManager->RemoveFromRenderAllObjectDebugInfo(pEnt);
 
@@ -4525,7 +4565,7 @@ void C3DEngine::FreeRNTmpData(CRNTmpData** ppInfo)
     assert(pTmpRNTData->pNext != &m_LTPRootFree);
     assert(pTmpRNTData->pPrev != &m_LTPRootFree);
     assert(pTmpRNTData != &m_LTPRootUsed);
-    if (gEnv->mMainThreadId != CryGetCurrentThreadId())
+    if (gEnv->mTickThreadId != CryGetCurrentThreadId())
     {
         CryFatalError("CRNTmpData should only be allocated and free'd on main thread.");
     }
@@ -4691,7 +4731,7 @@ void C3DEngine::FreeRNTmpDataPool()
     UpdateRNTmpDataPool(true);
 
     AUTO_LOCK(m_checkCreateRNTmpData);
-    if (gEnv->mMainThreadId != CryGetCurrentThreadId())
+    if (gEnv->mTickThreadId != CryGetCurrentThreadId())
     {
         CryFatalError("CRNTmpData should only be allocated and free'd on main thread.");
     }

@@ -27,6 +27,9 @@
 #include <AzFramework/Terrain/TerrainDataRequestBus.h>
 
 #include "TouchBendingCVegetationAgent.h"
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 #define BYTE2RAD(x) static_cast<float>((x) * g_PI2 / 255.0f)
 #define RAD2BYTE(x) static_cast<byte>((x) * 255.0f / g_PI2)
@@ -1051,4 +1054,24 @@ void CVegetation::GetTerrainAlignmentMatrix(const Vec3& vPos, const float amount
     Vec3 vDir = Vec3(-1, 0, 0).Cross(vTerrainNormal);
 
     matrix33 = matrix33.CreateOrientation(vDir, -vTerrainNormal, 0);
+}
+
+void CVegetation::CopyUpdatedData(const IRenderNode& renderNode)
+{
+    SetRndFlags(renderNode.GetRndFlags());
+    auto pNextFrameRenderNode = static_cast<const CVegetation*>(&renderNode);
+    m_vPos = pNextFrameRenderNode->m_vPos;
+    m_nObjectTypeIndex = pNextFrameRenderNode->m_nObjectTypeIndex;
+    m_ucAngle = pNextFrameRenderNode->m_ucAngle;
+    m_ucAngleX = pNextFrameRenderNode->m_ucAngleX;
+    m_ucAngleY = pNextFrameRenderNode->m_ucAngleY;
+    m_ucSunDotTerrain = pNextFrameRenderNode->m_ucSunDotTerrain;
+    m_ucScale = pNextFrameRenderNode->m_ucScale;
+    m_boxExtends[0] = pNextFrameRenderNode->m_boxExtends[0];
+    m_boxExtends[1] = pNextFrameRenderNode->m_boxExtends[1];
+    m_boxExtends[2] = pNextFrameRenderNode->m_boxExtends[2];
+    m_boxExtends[3] = pNextFrameRenderNode->m_boxExtends[3];
+    m_boxExtends[4] = pNextFrameRenderNode->m_boxExtends[4];
+    m_boxExtends[5] = pNextFrameRenderNode->m_boxExtends[5];
+    m_ucRadius = pNextFrameRenderNode->m_ucRadius;
 }

@@ -18,6 +18,7 @@
 #include <IRenderer.h>
 #include <limits>
 #include <AzCore/Component/EntityId.h>
+#include <IAsyncRenderWorldNodeRemove.h>
 
 namespace AZ 
 {
@@ -226,6 +227,10 @@ struct IRenderNode
 
     virtual bool CanExecuteRenderAsJob() { return false; }
 
+    virtual void CopyUpdatedData(const IRenderNode& renderNode) { }
+    virtual bool SupportsAsyncRender() const { return false; }
+    virtual bool UpdateStreamableData(float fEntDistanceReal, float fImportanceFactor, bool bFullUpdate) { return false; }
+
     // <interfuscator:shuffle>
     // Debug info about object.
     virtual const char* GetName() const = 0;
@@ -325,7 +330,11 @@ struct IRenderNode
     virtual struct IFoliage* GetFoliage(int nSlot = 0) { return 0; }
 
     // Make sure I3DEngine::FreeRenderNodeState(this) is called in destructor of derived class.
-    virtual ~IRenderNode() { assert(!m_pRNTmpData); };
+    virtual ~IRenderNode() { assert(!m_pRNTmpData);
+#if defined(USE_ASYNC_RENDER)
+    EBUS_EVENT(Fraglab::AsyncRenderWorldNodeRemoveRequestBus, DeleteRenderNode, this);
+#endif
+    };
 
     // Summary:
     //   Sets override material for this instance.

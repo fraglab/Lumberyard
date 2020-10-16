@@ -1003,6 +1003,7 @@ struct SSystemGlobalEnvironment
     ISystemScheduler*          pSystemScheduler;
 
     threadID                                 mMainThreadId;     //The main thread ID is used in multiple systems so should be stored globally
+    threadID                                 mTickThreadId;     // Replaces main thread id for render world optimization
 
                                                                 //////////////////////////////////////////////////////////////////////////
     uint32                     nMainFrameID;

@@ -61,6 +61,9 @@
 
 #include <AzCore/Jobs/LegacyJobExecutor.h>
 #include <AzCore/std/algorithm.h>
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 #pragma warning(disable: 4244)
 
@@ -6728,6 +6731,11 @@ void CD3D9Renderer::EF_Scene3D(SViewport& VP, int nFlags, const SRenderingPassIn
 
         //Only render the UI Canvas and the Console on the main window
         //If we're not in the editor, don't bother to check viewport
+#ifdef USE_ASYNC_RENDER
+        bool bAsyncRenderingEnabled = false;
+        EBUS_EVENT_RESULT(bAsyncRenderingEnabled, Fraglab::AsyncRenderWorldRequestBus, IsEnabled);
+        if (!bAsyncRenderingEnabled)
+#endif // USE_ASYNC_RENDER
         if (!gEnv->IsEditor() || m_CurrContext->m_bMainViewport)
         {
             EBUS_EVENT(AZ::RenderNotificationsBus, OnScene3DEnd);
@@ -6740,6 +6748,9 @@ void CD3D9Renderer::EF_Scene3D(SViewport& VP, int nFlags, const SRenderingPassIn
         // For the remaining 2D renderings that are still called at the end of frame(such as C3DEngine::DisplayInfo in CSystem::RenderEnd),
         // they are called after the TextMessage have already been rendered, so they will be eventually rendered 2 frames later.
         // This is not an ideal situation and we should find a better way to handle it later.
+#ifdef USE_ASYNC_RENDER
+        if (!bAsyncRenderingEnabled)
+#endif // USE_ASYNC_RENDER
         EF_RenderTextMessages();
     }
 }

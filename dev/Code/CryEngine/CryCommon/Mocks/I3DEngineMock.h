@@ -309,6 +309,10 @@ public:
         , void (const Vec3& vMin, const Vec3& vMax, ColorB col));
     MOCK_METHOD2(DrawBBoxHelper
         , void (const AABB& box, ColorB col));
+
+    MOCK_METHOD0(CallOnPreAsyncRender, void());
+    MOCK_METHOD2(RenderSceneEnd, void(const int nRenderFlags, const SRenderingPassInfo& passInfo));
+    MOCK_METHOD1(UpdatePostRender, void(const SRenderingPassInfo& passInfo));
     
     MOCK_METHOD3(ActivatePortal,
         void(const Vec3& vPos, bool bActivate, const char* szEntityName));

@@ -1938,6 +1938,10 @@ struct I3DEngine
     //        Gets current snow parameters.
     virtual bool GetSnowFallParams(int& nSnowFlakeCount, float& fSnowFlakeSize, float& fSnowFallBrightness, float& fSnowFallGravityScale, float& fSnowFallWindScale, float& fSnowFallTurbulence, float& fSnowFallTurbulenceFreq) = 0;
 
+    virtual void CallOnPreAsyncRender() = 0;
+    virtual void RenderSceneEnd(const int nRenderFlags, const SRenderingPassInfo& passInfo) = 0;
+    virtual void UpdatePostRender(const SRenderingPassInfo& passInfo) = 0;
+
     // Summary:
     //     Sets the view distance scale.
     // Arguments:

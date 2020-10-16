@@ -979,6 +979,8 @@ public:
     void UpdatePreRender(const SRenderingPassInfo& passInfo);
     void UpdatePostRender(const SRenderingPassInfo& passInfo);
 
+    void CallOnPreAsyncRender() override;
+    virtual void RenderSceneEnd(const int nRenderFlags, const SRenderingPassInfo& passInfo);
     virtual void RenderScene(const int nRenderFlags, const SRenderingPassInfo& passInfo);
     virtual void RenderSceneReflection(const int nRenderFlags, const SRenderingPassInfo& passInfo);
     virtual void DebugDraw_UpdateDebugNode();

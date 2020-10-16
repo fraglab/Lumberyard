@@ -78,6 +78,9 @@ namespace EMotionFX
             ICharacterInstance* GetEntityCharacter(unsigned int nSlot = 0, Matrix34A* pMatrix = nullptr, bool bReturnOnlyVisible = false) override;
             float GetMaxViewDist() override;
             void GetMemoryUsage(class ICrySizer* pSizer) const override;
+			void CopyUpdatedData(const IRenderNode& renderNode) override;
+            IRenderNode* Clone() const override;
+            bool SupportsAsyncRender() const override { return true; }
 
             //////////////////////////////////////////////////////////////////////////
             // AZ::TransformNotificationBus::Handler interface implementation

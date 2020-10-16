@@ -187,6 +187,7 @@
 #include "IDebugCallStack.h"
 
 #include "WindowsConsole.h"
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
 
 #if defined(EXTERNAL_CRASH_REPORTING)
 #include <CrashHandler.h>
@@ -3697,6 +3698,7 @@ bool CSystem::Init(const SSystemInitParams& startupParams)
 
     SetSystemGlobalState(ESYSTEM_GLOBAL_STATE_INIT);
     gEnv->mMainThreadId = GetCurrentThreadId();         //Set this ASAP on startup
+    gEnv->mTickThreadId = gEnv->mMainThreadId;
 
     InlineInitializationProcessing("CSystem::Init start");
     m_szCmdLine = startupParams.szSystemCmdLine;
@@ -5058,6 +5060,9 @@ bool CSystem::Init(const SSystemInitParams& startupParams)
         return false;
     }
 
+#ifdef USE_ASYNC_RENDER
+    EBUS_EVENT(Fraglab::AsyncRenderWorldSynchronizationRequestBus, LoadConfiguration);
+#endif
     m_bInitializedSuccessfully = true;
 
     return (true);

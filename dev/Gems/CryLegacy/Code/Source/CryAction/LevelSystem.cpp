@@ -43,6 +43,10 @@
 
 #include <LyShine/ILyShine.h>
 
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
+
 #ifdef WIN32
 #include <CryWindows.h>
 #endif
@@ -2156,6 +2160,9 @@ void CLevelSystem::UnLoadLevel()
         }
     }
 
+#ifdef USE_ASYNC_RENDER
+    EBUS_EVENT(Fraglab::AsyncRenderWorldSynchronizationRequestBus, LevelUnloadStart);
+#endif
     // Clear level entities and prefab instances.
     EBUS_EVENT(AzFramework::GameEntityContextRequestBus, ResetGameContext);
 

@@ -1,0 +1,24 @@
+{
+    "GemFormatVersion": 4,
+    "Uuid": "58a7cdecb233404d9900bc9939c396e1",
+    "Name": "Game01AsyncRender",
+    "DisplayName": "Game01AsyncRender",
+    "Version": "0.1.0",
+    "Summary": "Additional Game01AsyncRender debug menu for game01 project",
+    "Tags": ["Debug"],
+    "IconPath": "preview.png",
+    "Modules": [
+        {
+            "Type": "GameModule"
+        }
+    ],
+    "Dependencies": [
+        {
+            "Uuid": "bab8807a1bc646b3909f3cc200ffeedf",
+            "VersionConstraints": [
+                ">=0.1.0"
+            ],
+            "_comment": "ImGui Gem"
+        }
+    ]
+}

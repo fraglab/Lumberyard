@@ -129,6 +129,9 @@ namespace LmbrCentral
         AZ::EntityId GetEntityId() override { return m_renderOptions.m_attachedToEntityId; }
         float GetUniformScale() override;
         float GetColumnScale(int column) override;
+        void CopyUpdatedData(const IRenderNode& renderNode) override;
+        IRenderNode* Clone() const override;
+        bool SupportsAsyncRender() const override { return true; }
         //////////////////////////////////////////////////////////////////////////
 
         //! Invoked in the editor when a property requiring render state refresh

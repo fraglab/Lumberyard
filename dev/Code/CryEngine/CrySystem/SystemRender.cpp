@@ -57,6 +57,7 @@
 #include "ThreadInfo.h"
 
 #include <LoadScreenBus.h>
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
 
 #if defined(AZ_RESTRICTED_PLATFORM)
 #undef AZ_RESTRICTED_SECTION
@@ -271,6 +272,10 @@ int StrToPhysHelpers(const char* strHelpers);
 //////////////////////////////////////////////////////////////////////////
 void CSystem::RenderEnd(bool bRenderStats, bool bMainWindow)
 {
+#ifdef USE_ASYNC_RENDER
+    EBUS_EVENT(Fraglab::AsyncRenderWorldSynchronizationRequestBus, ProcessAsyncRenderNodes);
+#endif
+
     {
         FUNCTION_PROFILER_FAST(GetISystem(), PROFILE_SYSTEM, g_bProfilerEnabled);
 
@@ -357,6 +362,10 @@ void CSystem::RenderEnd(bool bRenderStats, bool bMainWindow)
             }
         }
     }
+
+#ifdef USE_ASYNC_RENDER
+    EBUS_EVENT(Fraglab::AsyncRenderWorldSynchronizationRequestBus, CleanRemovedRenderNodes);
+#endif
 
 #if defined(USE_FRAME_PROFILER)
     gEnv->bProfilerEnabled = m_sys_profile->GetIVal() != 0;
@@ -800,9 +809,11 @@ void CSystem::Render()
         }
     }
 
+ASYNC_RENDER_ENABLED_BEGIN
     m_env.p3DEngine->WorldStreamUpdate();
 
     gEnv->pRenderer->SwitchToNativeResolutionBackbuffer();
+ASYNC_RENDER_ENABLED_END
 }
 
 //////////////////////////////////////////////////////////////////////////

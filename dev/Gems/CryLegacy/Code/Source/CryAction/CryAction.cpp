@@ -18,6 +18,9 @@
 #include <AzCore/Component/TickBus.h>
 #include <AzCore/Asset/AssetCommon.h>
 #include <AzCore/Component/ComponentApplicationBus.h>
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 
 #if defined(AZ_RESTRICTED_PLATFORM)
@@ -1686,6 +1689,10 @@ bool CCryAction::PostUpdate(bool haveFocus, unsigned int updateFlags)
 {
     FUNCTION_PROFILER(GetISystem(), PROFILE_SYSTEM);
 
+#ifdef USE_ASYNC_RENDER
+    EBUS_EVENT(Fraglab::AsyncRenderWorldSynchronizationRequestBus, WaitRenderingCompleted);
+#endif
+
     bool bRetRun = true;
     bool gameRunning = IsGameStarted();
     bool bGameIsPaused = !gameRunning || IsGamePaused(); // slightly different from m_paused (check's gEnv->pTimer as well)
@@ -1902,6 +1909,16 @@ bool CCryAction::PostUpdate(bool haveFocus, unsigned int updateFlags)
         m_pViewSystem->Update(min(delta, 0.1f));
     }
 
+#ifdef USE_ASYNC_RENDER
+    bool bAsyncRenderingEnabled = false;
+    EBUS_EVENT_RESULT(bAsyncRenderingEnabled, Fraglab::AsyncRenderWorldRequestBus, IsEnabled);
+    if (bAsyncRenderingEnabled)
+    {
+        EBUS_EVENT(Fraglab::AsyncRenderWorldSynchronizationRequestBus, DoAfterAsyncRenderingCompleted);
+    }
+    else
+    {
+#endif
     // Begin occlusion job after setting the correct camera.
     gEnv->p3DEngine->PrepareOcclusion(m_pSystem->GetViewCamera());
 
@@ -1913,6 +1930,9 @@ bool CCryAction::PostUpdate(bool haveFocus, unsigned int updateFlags)
     m_pSystem->Render();
 
     gEnv->p3DEngine->EndOcclusion();
+#ifdef USE_ASYNC_RENDER
+    }
+#endif
 
     if (m_pPersistentDebug)
     {
@@ -2463,6 +2483,13 @@ const char* CCryAction::GetStartLevelSaveGameName()
 #endif
     levelstart.append(LY_SAVEGAME_FILE_EXT);
     return levelstart.c_str();
+}
+
+void CCryAction::CallOnPreRenderListeners()
+{
+#ifdef USE_ASYNC_RENDER
+    CALL_FRAMEWORK_LISTENERS(OnPreRender());
+#endif
 }
 
 static void BroadcastCheckpointEvent(ESaveGameReason)

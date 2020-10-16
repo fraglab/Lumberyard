@@ -25,6 +25,7 @@
 
 #include <MathConversion.h>
 #include <AzFramework/Terrain/TerrainDataRequestBus.h>
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
 
 PodArray<SPlaneObject> CLightEntity::s_lstTmpCastersHull;
 
@@ -1941,4 +1942,37 @@ void CLightEntity::ProcessPerObjectFrustum(ShadowMapFrustum* pFr, struct SPerObj
         pFr->DrawFrustum(GetRenderer(), (GetCVars()->e_ShadowsFrustums == 1) ? 1000 : 1);
         Get3DEngine()->DrawBBox(pFr->aabbCasters, Col_Green);
     }
+}
+
+void CLightEntity::CopyUpdatedData(const IRenderNode& renderNode)
+{
+    SetRndFlags(renderNode.GetRndFlags());
+    auto pNextFrameRenderNode = static_cast<const CLightEntity*>(&renderNode);
+    m_Matrix = pNextFrameRenderNode->m_Matrix;
+    m_light.SetPosition(pNextFrameRenderNode->m_light.GetPosition());
+    m_WSBBox = pNextFrameRenderNode->m_WSBBox;
+}
+
+IRenderNode* CLightEntity::Clone() const
+{
+    if (m_pStatObj)
+    {
+        m_pStatObj->AddRef();
+    }
+
+    auto renderNodeFillThread = new CLightEntity;
+    renderNodeFillThread->m_layerId = m_layerId;
+    renderNodeFillThread->m_VoxelGIMode = m_VoxelGIMode;
+    renderNodeFillThread->m_Name = m_Name;
+    renderNodeFillThread->m_pStatObj = m_pStatObj;
+    renderNodeFillThread->SetRndFlags(GetRndFlags());
+    renderNodeFillThread->SetLightProperties(m_light);
+    renderNodeFillThread->m_bShadowCaster = m_bShadowCaster;
+    renderNodeFillThread->m_pMaterial = m_pMaterial;
+    renderNodeFillThread->m_Matrix = m_Matrix;
+    renderNodeFillThread->m_pNotCaster = m_pNotCaster;
+    renderNodeFillThread->m_pShadowMapInfo = nullptr;
+    renderNodeFillThread->m_WSBBox = m_WSBBox;
+
+    return renderNodeFillThread;
 }

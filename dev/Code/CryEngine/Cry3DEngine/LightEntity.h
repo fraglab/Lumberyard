@@ -102,6 +102,9 @@ public:
 
     void SetLayerId(uint16 nLayerId) { m_layerId = nLayerId; }
     uint16 GetLayerId() { return m_layerId; }
+    void CopyUpdatedData(const IRenderNode& renderNode) override;
+    IRenderNode* Clone() const override;
+    bool SupportsAsyncRender() const override { return true; }
 
 private:
     static PodArray<SPlaneObject> s_lstTmpCastersHull;

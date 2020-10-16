@@ -271,7 +271,7 @@ void CGeomCacheManager::ReinitializeStreamFrameData(SGeomCacheStreamInfo& stream
 
 void CGeomCacheManager::UnRegisterForStreaming(CGeomCacheRenderNode* pRenderNode, bool bWaitForJobs)
 {
-    assert(gEnv->mMainThreadId == CryGetCurrentThreadId());
+    assert(gEnv->mTickThreadId == CryGetCurrentThreadId());
 
     TStreamInfosIter iter = m_streamInfos.begin();
     while (iter != m_streamInfos.end())

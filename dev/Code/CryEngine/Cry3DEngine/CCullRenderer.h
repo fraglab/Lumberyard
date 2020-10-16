@@ -15,6 +15,9 @@
 
 #include "VMath.hpp"
 #include <AzCore/Debug/Profiler.h>
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 //#define CULL_RENDERER_REPROJ_DEBUG
 #define CULL_RENDERER_MINZ
@@ -110,6 +113,10 @@ namespace NAsyncCull
         tdZexel*                            m_ZBuffer;
 
         tdZexel** m_ZBufferSwap;
+
+#ifdef USE_ASYNC_RENDER
+        bool m_bJobAssistingMainThread;
+#endif // USE_ASYNC_RENDER
 
         DEFINE_ALIGNED_DATA(tdZexel, m_ZBufferSwapMerged[SIZEX * SIZEY], 128); // 128 byte for XMemSet128
 
@@ -477,6 +484,16 @@ namespace NAsyncCull
             }
 
             m_nNumWorker = AZ::JobContext::GetGlobalContext()->GetJobManager().GetNumWorkerThreads();
+
+#ifdef USE_ASYNC_RENDER
+            m_bJobAssistingMainThread = false;
+            EBUS_EVENT_RESULT(m_bJobAssistingMainThread, Fraglab::AsyncRenderWorldRequestBus, IsEnabled);
+            if (m_bJobAssistingMainThread && m_nNumWorker)
+            {
+                ++m_nNumWorker;
+            }
+#endif // USE_ASYNC_RENDER
+
             m_ZBufferSwap = new tdZexel*[m_nNumWorker];
             for (uint32 i = 0; i < m_nNumWorker; ++i)
             {
@@ -522,7 +539,15 @@ namespace NAsyncCull
             //#define USE_W_DEPTH
             //#define SCALE_DEPTH
 
+#ifdef USE_ASYNC_RENDER
+            uint32 workerThreadID = AZ::JobContext::GetGlobalContext()->GetJobManager().GetWorkerThreadId();
+            if (m_bJobAssistingMainThread && AZ::JobManager::InvalidWorkerThreadId == workerThreadID)
+            {
+                workerThreadID = AZ::JobContext::GetGlobalContext()->GetJobManager().GetNumWorkerThreads();
+            }
+#else
             const uint32 workerThreadID = AZ::JobContext::GetGlobalContext()->GetJobManager().GetWorkerThreadId();
+#endif // USE_ASYNC_RENDER // FL[FD-12690] RenderWorld as async job
             CRY_ASSERT(workerThreadID != AZ::JobManager::InvalidWorkerThreadId);
             float* pZBufferSwap = m_ZBufferSwap[workerThreadID];
 

@@ -25,6 +25,9 @@
 // Confetti END:
 #include "../RenderView.h"
 #include "../Textures/TextureManager.h"
+#if defined(USE_ASYNC_RENDER) && !defined(NULL_RENDERER)
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 // CFillRateManager implementation
@@ -442,6 +445,14 @@ void CRenderer::PrepareParticleRenderObjects(Array<const SAddParticlesToSceneJob
     {
         m_ComputeVerticesJobExecutors[threadList].PopCompletionFence();
     }
+#if defined(USE_ASYNC_RENDER)
+    bool bAsyncRenderingEnabled = false;
+    EBUS_EVENT_RESULT(bAsyncRenderingEnabled, Fraglab::AsyncRenderWorldRequestBus, IsEnabled);
+    if (bAsyncRenderingEnabled && passInfo.IsGeneralPass())
+    {
+        m_ComputeVerticesJobExecutors[threadList].WaitForCompletion();
+    }
+#endif // USE_ASYNC_RENDER
 #endif
 }
 

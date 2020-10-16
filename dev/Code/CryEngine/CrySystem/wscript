@@ -27,6 +27,7 @@ def build(bld):
         use                     = ['AzFramework',
                                    'GridMate',
                                    'CrashHandler',
+                                   'AzGameFramework',
                                    'RemoteConsoleCore'],
         uselib                  = ['LZ4',
                                    'TIFF',

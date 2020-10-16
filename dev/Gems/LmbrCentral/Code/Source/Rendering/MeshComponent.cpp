@@ -22,6 +22,9 @@
 
 #include <LmbrCentral/Rendering/GiRegistrationBus.h>
 #include <MathConversion.h>
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 #include <I3DEngine.h>
 #include <ICryAnimation.h>
@@ -1027,6 +1030,66 @@ namespace LmbrCentral
     /*IRenderNode*/ ICharacterInstance* MeshComponentRenderNode::GetEntityCharacter(unsigned int nSlot, Matrix34A* pMatrix, bool bReturnOnlyVisible)
     {
         return nullptr;
+    }
+
+    void MeshComponentRenderNode::CopyUpdatedData(const IRenderNode& renderNode)
+    {
+        auto pNextFrameRenderNode = static_cast<const MeshComponentRenderNode*>(&renderNode);
+        if (m_statObj != pNextFrameRenderNode->m_statObj)
+        {
+            m_worldTransform = pNextFrameRenderNode->m_worldTransform;
+            m_materialOverride = pNextFrameRenderNode->m_materialOverride;
+            m_meshAsset = pNextFrameRenderNode->m_meshAsset;
+            m_statObj = pNextFrameRenderNode->m_statObj;
+            SetRndFlags(pNextFrameRenderNode->GetRndFlags());
+            SetAcceptDecals(pNextFrameRenderNode->m_isAcceptingDecals);
+            m_renderOptions = pNextFrameRenderNode->m_renderOptions;
+            m_doNotUnloadTextures = pNextFrameRenderNode->m_doNotUnloadTextures;
+            m_alwaysUseTopMipInGame = pNextFrameRenderNode->m_alwaysUseTopMipInGame;
+            m_maskCullingParts = pNextFrameRenderNode->m_maskCullingParts;
+            m_lodDistance = pNextFrameRenderNode->m_lodDistance;
+            m_lodDistanceScaled = pNextFrameRenderNode->m_lodDistanceScaled;
+            m_lodDistanceScaleValue = pNextFrameRenderNode->m_lodDistanceScaleValue;
+        }
+
+        m_isRenderNearest = pNextFrameRenderNode->m_isRenderNearest;
+        m_renderTransform = pNextFrameRenderNode->m_renderTransform;
+        m_dissolveParamZ = pNextFrameRenderNode->m_dissolveParamZ;
+        m_localBoundingBox = pNextFrameRenderNode->m_localBoundingBox;
+        pNextFrameRenderNode->CopyIRenderNodeData(this);
+        if (!IsEquivalent(m_worldBoundingBox, pNextFrameRenderNode->m_worldBoundingBox))
+        {
+            UpdateWorldBoundingBox();
+            m_objectMoved = true;
+        }
+    }
+
+    IRenderNode* MeshComponentRenderNode::Clone() const
+    {
+        auto renderNodeFillThread = AZStd::make_unique<MeshComponentRenderNode>();
+
+        renderNodeFillThread->m_worldTransform = m_worldTransform;
+        renderNodeFillThread->m_renderTransform = m_renderTransform;
+        renderNodeFillThread->m_localBoundingBox = m_localBoundingBox;
+        renderNodeFillThread->m_worldBoundingBox = m_worldBoundingBox;
+        renderNodeFillThread->m_materialOverride = m_materialOverride;
+        renderNodeFillThread->m_meshAsset = m_meshAsset;
+        renderNodeFillThread->m_statObj = m_statObj;
+        renderNodeFillThread->SetRndFlags(GetRndFlags());
+        renderNodeFillThread->SetRenderNearest(m_isRenderNearest);
+        renderNodeFillThread->SetAcceptDecals(m_isAcceptingDecals);
+        renderNodeFillThread->m_renderOptions = m_renderOptions;
+        renderNodeFillThread->m_doNotUnloadTextures = m_doNotUnloadTextures;
+        renderNodeFillThread->m_alwaysUseTopMipInGame = m_alwaysUseTopMipInGame;
+        renderNodeFillThread->m_maskCullingParts = m_maskCullingParts;
+        renderNodeFillThread->m_dissolveParamZ = m_dissolveParamZ;
+        renderNodeFillThread->m_lodDistance = m_lodDistance;
+        renderNodeFillThread->m_lodDistanceScaled = m_lodDistanceScaled;
+        renderNodeFillThread->m_lodDistanceScaleValue = m_lodDistanceScaleValue;
+        renderNodeFillThread->m_globalViewDistMult = m_globalViewDistMult;
+        renderNodeFillThread->m_gameSpecifficFlags = m_gameSpecifficFlags;
+
+        return renderNodeFillThread.release();
     }
 
     //////////////////////////////////////////////////////////////////////////

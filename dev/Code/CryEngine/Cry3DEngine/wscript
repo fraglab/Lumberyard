@@ -25,7 +25,7 @@ def build(bld):
         pch                = 'StdAfx.cpp',
         platforms          = ['all'],
         configurations     = ['all'],
-        use                = [ 'AzFramework' ],
+        use                = [ 'AzFramework', 'AzGameFramework' ],
         win_features       = ['crcfix'],
         includes           = [bld.Path('Code/CryEngine/CryCommon'),
                               bld.ThirdPartyPath('mikkt')

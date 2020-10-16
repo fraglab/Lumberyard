@@ -23,6 +23,7 @@ def build(bld):
         win_features    = ['crcfix'],
         defines         = [define_enable_cry_physics],
         export_defines  = [define_enable_cry_physics],
+        use             = ['AzGameFramework'],
 
         editor       = dict(
 
@@ -30,7 +31,7 @@ def build(bld):
             platforms   = ['win', 'darwin', 'linux'],
             features    = ['qt5', 'ExternalLyIdentity', 'ExternalLyMetrics'],
 
-            use         = ['AzToolsFramework', 'AzQtComponents', 'AssetBuilderSDK'] + bld.make_aws_library_task_list(['LyMetricsProducer', 'LyMetricsShared', 'LyIdentity']),
+            use         = ['AzToolsFramework', 'AzQtComponents', 'AssetBuilderSDK', 'AzToolsFramework'] + bld.make_aws_library_task_list(['LyMetricsProducer', 'LyMetricsShared', 'LyIdentity']),
             includes    = ['include',
                            'Source',
                            bld.Path('Code/Sandbox'),

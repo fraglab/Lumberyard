@@ -214,6 +214,9 @@ public:
     {
         FillBBoxFromExtends(aabb, m_boxExtends, m_vPos);
     }
+
+    void CopyUpdatedData(const IRenderNode& renderNode) override;
+    bool SupportsAsyncRender() const override { return true; }
 };
 
 #endif // CRYINCLUDE_CRY3DENGINE_VEGETATION_H

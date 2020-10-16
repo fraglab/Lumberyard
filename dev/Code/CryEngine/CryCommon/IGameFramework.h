@@ -1002,6 +1002,7 @@ struct IGameFramework
     virtual void RegisterExtension(ICryUnknownPtr pExtension) = 0;
 
     virtual void ReleaseExtensions() = 0;
+    virtual void CallOnPreRenderListeners() = 0;
 
     // Description:
     //      Retrieves an extension interface if registered with the framework

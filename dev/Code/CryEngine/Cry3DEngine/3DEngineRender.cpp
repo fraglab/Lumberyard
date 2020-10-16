@@ -73,6 +73,7 @@
 #include <AzFramework/StringFunc/StringFunc.h>
 #include <AzCore/IO/SystemFile.h> // for AZ_MAX_PATH_LEN
 #include "../RenderDll/Common/Memory/VRAMDrillerBus.h"
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // RenderScene
@@ -971,7 +972,9 @@ void C3DEngine::RenderInternal(const int nRenderFlags, const SRenderingPassInfo&
 #else
     UpdatePreRender(passInfo);
     RenderScene(nRenderFlags, passInfo);
+ASYNC_RENDER_ENABLED_BEGIN
     UpdatePostRender(passInfo);
+ASYNC_RENDER_ENABLED_END
 #endif
 }
 
@@ -1477,7 +1480,9 @@ void C3DEngine::UpdatePreRender(const SRenderingPassInfo& passInfo)
 #endif // if AZ_RENDER_TO_TEXTURE_GEM_ENABLED
     {
         // Update particle system as late as possible, only renderer is dependent on it.
+ASYNC_RENDER_ENABLED_BEGIN
         m_pPartManager->Update();
+ASYNC_RENDER_ENABLED_END
     }
 
     if (passInfo.RenderClouds())
@@ -1490,7 +1495,9 @@ void C3DEngine::UpdatePreRender(const SRenderingPassInfo& passInfo)
         CVolumeObjectRenderNode::MoveVolumeObjects();
     }
 
+ASYNC_RENDER_ENABLED_BEGIN
     UpdateSun(passInfo);
+ASYNC_RENDER_ENABLED_END
 
     // Set traceable fog volume areas
     CFogVolumeRenderNode::SetTraceableArea(AABB(passInfo.GetCamera().GetPosition(), 1024.0f), passInfo);
@@ -1747,7 +1754,9 @@ void C3DEngine::RenderScene(const int nRenderFlags, const SRenderingPassInfo& pa
     }
 
     m_bIsInRenderScene = true;
+ASYNC_RENDER_ENABLED_BEGIN
     COctreeNode::ReleaseEmptyNodes();
+ASYNC_RENDER_ENABLED_END
 
     m_LightVolumesMgr.Clear(passInfo);
 
@@ -1867,10 +1876,12 @@ void C3DEngine::RenderScene(const int nRenderFlags, const SRenderingPassInfo& pa
     }
     rendItemSorter.IncreaseGroupCounter();
 
+ASYNC_RENDER_ENABLED_BEGIN
     if (m_pOcean)
     {
         ProcessOcean(passInfo);
     }
+ASYNC_RENDER_ENABLED_END
 
     if (passInfo.RenderDecals() && m_pDecalManager != nullptr)
     {
@@ -1905,6 +1916,23 @@ void C3DEngine::RenderScene(const int nRenderFlags, const SRenderingPassInfo& pa
         const bool clearVisSectors = true;
         legacyTerrain->ClearTextureSetsAndDrawVisibleSectors(clearVisSectors, passInfo);
     }
+
+ASYNC_RENDER_ENABLED_BEGIN
+    RenderSceneEnd(nRenderFlags, passInfo);
+ASYNC_RENDER_ENABLED_END
+}
+
+// FL[FD-12690] RenderWorld as async job
+void C3DEngine::RenderSceneEnd(const int nRenderFlags, const SRenderingPassInfo& passInfo)
+{
+ASYNC_RENDER_IF_ENABLED_BEGIN
+    if (m_pOcean)
+    {
+        ProcessOcean(passInfo);
+    }
+ASYNC_RENDER_ENABLED_END
+
+    auto legacyTerrain = LegacyTerrain::LegacyTerrainDataRequestBus::FindFirstHandler();
 
     if (m_pPartManager != nullptr)
     {

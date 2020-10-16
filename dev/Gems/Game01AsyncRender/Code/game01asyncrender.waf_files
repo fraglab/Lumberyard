@@ -1,0 +1,31 @@
+{
+  "none": {
+    "Source": [
+      "Source/game01asyncrender_precompiled.cpp",
+      "Source/game01asyncrender_precompiled.h"
+    ]
+  },
+  "auto": {
+    "Source": [
+      "Source/Game01AsyncRenderModule.cpp",
+      "Source/SystemComponent.cpp",
+      "Source/SystemComponent.h",
+      "Source/RenderNodesRegistratorHelper.cpp",
+      "Source/RenderNodesRegistratorHelper.h",
+      "Source/RenderWorldFunctions.cpp",
+      "Source/RenderWorldFunctions.h",
+      "Source/EngineHelperFunctions.cpp",
+      "Source/EngineHelperFunctions.h",
+      "Source/RenderNodesManager.cpp",
+      "Source/RenderNodesManager.h",
+      "Source/RemovedNodesManager.cpp",
+      "Source/RemovedNodesManager.h",
+      "Source/MockAsyncRenderNode.cpp",
+      "Source/MockAsyncRenderNode.h",
+      "Source/PerformanceWindow.cpp",
+      "Source/PerformanceWindow.h",
+      "Source/CVars/AsyncRenderCVars.cpp",
+      "Source/CVars/AsyncRenderCVars.h"
+    ]
+  }
+}

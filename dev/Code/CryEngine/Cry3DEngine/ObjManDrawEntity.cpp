@@ -435,7 +435,10 @@ void CObjManager::RenderObject(IRenderNode* pEnt,
     }
 
     DrawParams.nMaterialLayers = pEnt->GetMaterialLayers();
-    DrawParams.lodValue = pEnt->ComputeLod(pEnt->m_pRNTmpData->userData.nWantedLod, passInfo);
+    if (pEnt->m_pRNTmpData)
+    {
+        DrawParams.lodValue = pEnt->ComputeLod(pEnt->m_pRNTmpData->userData.nWantedLod, passInfo);
+    }
     DrawParams.rendItemSorter = rendItemSorter.GetValue();
 
     pEnt->Render(DrawParams, passInfo);

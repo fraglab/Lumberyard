@@ -174,6 +174,7 @@ public:
     IRealtimeRemoteUpdate* GetIRealTimeRemoteUpdate() override;
     IGamePhysicsSettings* GetIGamePhysicsSettings() override;
     const char* GetStartLevelSaveGameName() override;
+    void CallOnPreRenderListeners() override;
 
     bool StartGameContext(const SGameStartParams* pGameStartParams) override;
     bool ChangeGameContext(const SGameContextParams* pGameContextParams) override;

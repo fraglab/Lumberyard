@@ -41,6 +41,9 @@
 #include <IRenderMesh.h>
 #include <MathConversion.h>
 #include <QTangent.h>
+#ifdef USE_ASYNC_RENDER
+#include <AzGameFramework/FragLab/AsyncRender/AsyncRenderWorldRequestBus.h>
+#endif
 
 #if defined(EMOTIONFXANIMATION_EDITOR)
 #    include <Material/Material.h>
@@ -573,6 +576,32 @@ namespace EMotionFX
 
         void CryRenderActorInstance::GetMemoryUsage(class ICrySizer* /*pSizer*/) const
         {
+        }
+		
+		void ActorRenderNode::CopyUpdatedData(const IRenderNode& renderNode)
+        {
+            auto pNextFrameRenderNode = static_cast<const ActorRenderNode *>(&renderNode);
+            m_renderTransform = pNextFrameRenderNode->m_renderTransform;
+            m_isRenderNearest = pNextFrameRenderNode->m_isRenderNearest;
+            m_isInteractiveObject = pNextFrameRenderNode->m_isInteractiveObject;
+            m_dissolveParamZ = pNextFrameRenderNode->m_isInteractiveObject;
+            SetRndFlags(renderNode.GetRndFlags());
+            pNextFrameRenderNode->CopyIRenderNodeData(this);
+            UpdateWorldBoundingBox();
+        }
+        
+        IRenderNode* ActorRenderNode::Clone() const
+        {
+            auto renderNodeFillThread = AZStd::make_unique<ActorRenderNode>(AZ::EntityId(), m_actorInstance, m_actorAsset, AZ::Transform::CreateIdentity());
+            renderNodeFillThread->m_renderTransform = m_renderTransform;
+            renderNodeFillThread->SetMaterials(m_materialPerLOD);
+            renderNodeFillThread->SetSkinningMethod(m_skinningMethod);
+            renderNodeFillThread->SetRndFlags(GetRndFlags());
+            renderNodeFillThread->SetRenderNearest(m_isRenderNearest);
+            renderNodeFillThread->SetAcceptDecals(m_isAcceptingDecals);
+            renderNodeFillThread->m_gameSpecifficFlags = m_gameSpecifficFlags;
+
+            return renderNodeFillThread.release();
         }
 
         bool CryRenderActorInstance::MorphTargetWeightsWereUpdated(uint32 lodLevel)
